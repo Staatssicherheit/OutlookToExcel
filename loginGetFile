@@ -1,0 +1,15 @@
+# Define the URL of the Excel file
+$url = "http://example.com/excelfile.xlsx"
+
+# Specify the path where you want to save the Excel file
+$outputFilePath = "C:\Path\To\Save\excelfile.xlsx"
+
+# Send HTTP request to download the file
+Invoke-WebRequest -Uri $url -OutFile $outputFilePath
+
+# Check if the file was downloaded successfully
+if (Test-Path $outputFilePath) {
+    Write-Host "Excel file downloaded successfully."
+} else {
+    Write-Host "Failed to download the Excel file."
+}
