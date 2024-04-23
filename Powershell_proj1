@@ -52,6 +52,34 @@ while ((Get-Date) -lt ($StartTime).AddSeconds($TimeoutSeconds)) {
 
 if ($Downloaded) {
     # Move the downloaded file to the designated folder
+    $DestinationFolder = "C:\path\to\output\folder"
+    $DestinationPath = Join-Path -Path $DestinationFolder -ChildPath "downloaded_file.csv"
+    Move-Item -Path $DownloadFilePath -Destination $DestinationPath -Force
+    Write-Output "File downloaded successfully and moved to $DestinationPath"
+} else {
+    Write-Output "File download timed out."
+}
+
+# Click the button to download the Excel CSV file
+$DownloadButton = $Driver.FindElementByXPath("//button[@id='downloadButton']")
+$DownloadButton.Click()
+
+# Wait for the file to download (adjust the timeout as needed)
+$DownloadFilePath = "C:\path\to\downloaded\file.csv"
+$TimeoutSeconds = 60  # Adjust as needed
+$Downloaded = $false
+$StartTime = Get-Date
+
+while ((Get-Date) -lt ($StartTime).AddSeconds($TimeoutSeconds)) {
+    if (Test-Path $DownloadFilePath) {
+        $Downloaded = $true
+        break
+    }
+    Start-Sleep -Seconds 1
+}
+
+if ($Downloaded) {
+    # Move the downloaded file to the designated folder
     $DestinationFolder = "C:\path\to\designated\folder"
     $DestinationPath = Join-Path -Path $DestinationFolder -ChildPath "downloaded_file.csv"
     Move-Item -Path $DownloadFilePath -Destination $DestinationPath -Force
