@@ -1,0 +1,67 @@
+Install-Module -Name Selenium.WebDriver
+
+Import-Module Selenium.WebDriver
+
+# Set the path to your WebDriver executable (e.g., chromedriver.exe)
+$DriverPath = "C:\path\to\chromedriver.exe"
+$Driver = New-Object OpenQA.Selenium.Chrome.ChromeDriver($DriverPath)
+
+$Driver.Navigate().GoToUrl("https://example.com/login")
+
+# Find and input username
+$UsernameField = $Driver.FindElementByXPath("//input[@id='username']")
+$UsernameField.SendKeys("your_username")
+
+# Find and input password
+$PasswordField = $Driver.FindElementByXPath("//input[@id='password']")
+$PasswordField.SendKeys("your_password")
+
+# Find and click the login button
+$LoginButton = $Driver.FindElementByXPath("//button[@id='loginButton']")
+$LoginButton.Click()
+
+
+$Driver.Navigate().GoToUrl("https://example.com/tableview")
+
+$Checkbox = $Driver.FindElementByXPath("//input[@id='checkboxID']")
+$Checkbox.Click()
+
+$Dropdown = $Driver.FindElementByXPath("//select[@id='dropdownID']")
+$Dropdown.SelectByText("Option text")
+
+# Execute JavaScript to perform any necessary actions before clicking the download button
+$Driver.ExecuteScript("javascript_code_to_execute_here")
+
+# Click the button to download the Excel CSV file
+$DownloadButton = $Driver.FindElementByXPath("//button[@id='downloadButton']")
+$DownloadButton.Click()
+
+# Wait for the file to download (adjust the timeout as needed)
+$DownloadFilePath = "C:\path\to\downloaded\file.csv"
+$TimeoutSeconds = 60  # Adjust as needed
+$Downloaded = $false
+$StartTime = Get-Date
+
+while ((Get-Date) -lt ($StartTime).AddSeconds($TimeoutSeconds)) {
+    if (Test-Path $DownloadFilePath) {
+        $Downloaded = $true
+        break
+    }
+    Start-Sleep -Seconds 1
+}
+
+if ($Downloaded) {
+    # Move the downloaded file to the designated folder
+    $DestinationFolder = "C:\path\to\designated\folder"
+    $DestinationPath = Join-Path -Path $DestinationFolder -ChildPath "downloaded_file.csv"
+    Move-Item -Path $DownloadFilePath -Destination $DestinationPath -Force
+    Write-Output "File downloaded successfully and moved to $DestinationPath"
+} else {
+    Write-Output "File download timed out."
+}
+
+
+$Driver.Quit()
+
+
+
