@@ -1,0 +1,22 @@
+    # Website and credential variables
+    $YourURL = "https://URL" # Website we'll access
+    
+    # Invoke Selenium into our script!
+    $env:PATH += ";C:\Temp\PSL\" # Adds the path for ChromeDriver.exe to the environmental variable 
+    Add-Type -Path "C:\Temp\PSL\WebDriver.dll" # Adding Selenium's .NET assembly (dll) to access it's classes in this PowerShell session
+    $ChromeDriver = New-Object OpenQA.Selenium.Chrome.ChromeDriver # Creates an instance of this class to control Selenium and stores it in an easy to handle variable
+    
+    # Make use of Selenium's class methods to manage our browser at will
+    $ChromeDriver.Navigate().GoToURL($YourURL) # Browse to the specified website
+    $ChromeDriver.FindElementByName("identifier").SendKeys("my_gmailuser@gmail.com") 
+    $ChromeDriver.FindElementByXPath("//span[text()='Next']").Click
+    $ChromeDriver.FindElementByName("password").SendKeys("MY_password")
+    
+    $ChromeDriver.FindElementByXPath("//span[text()='Next']").Click
+    
+    # Cleaning up after ourselves!
+    Pause
+    Function Stop-ChromeDriver {Get-Process -Name chromedriver -ErrorAction SilentlyContinue | Stop-Process -ErrorAction SilentlyContinue}
+    $ChromeDriver.Close() 
+    $ChromeDriver.Quit() 
+    Stop-ChromeDriver
