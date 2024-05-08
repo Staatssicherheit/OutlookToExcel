@@ -1,0 +1,62 @@
+Option Explicit
+
+Declare PtrSafe Function OpenClipboard Lib "user32" (ByVal hwnd As LongPtr) As LongPtr
+Declare PtrSafe Function EmptyClipboard Lib "user32" () As LongPtr
+Declare PtrSafe Function CloseClipboard Lib "user32" () As LongPtr
+Declare PtrSafe Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As LongPtr) As LongPtr
+Declare PtrSafe Function GlobalLock Lib "kernel32" (ByVal hMem As LongPtr) As LongPtr
+Declare PtrSafe Function GlobalUnlock Lib "kernel32" (ByVal hMem As LongPtr) As LongPtr
+Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As LongPtr) As LongPtr
+Declare PtrSafe Function lstrcpy Lib "kernel32" Alias "lstrcpyW" (ByVal lpString1 As LongPtr, ByVal lpString2 As LongPtr) As LongPtr
+Declare PtrSafe Function SetClipboardData Lib "user32" (ByVal wFormat As Long, ByVal hMem As LongPtr) As LongPtr
+
+Const CF_UNICODETEXT As Long = &HD ' Unicode text format
+
+Sub CopyToClipboardWithSentences()
+    Dim myData As String
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim i As Integer
+    Dim hGlobalMemory As LongPtr
+    Dim lpGlobalMemory As LongPtr
+    
+    ' Array of sheet names and corresponding ranges
+    Dim sheetsAndRanges As Variant
+    sheetsAndRanges = Array("메인_보고서!B5:R39", "고객사 단말현황!D3:X24", "고객사점검!B2:M49", "대표번호 녹취내역")
+    
+    ' Copy each specified range to clipboard
+    For i = LBound(sheetsAndRanges) To UBound(sheetsAndRanges)
+        If InStr(sheetsAndRanges(i), "!") > 0 Then
+            Set ws = ThisWorkbook.Sheets(Split(sheetsAndRanges(i), "!")(0))
+            Set rng = ws.Range(Split(sheetsAndRanges(i), "!")(1))
+        Else
+            Set ws = ThisWorkbook.Sheets(sheetsAndRanges(i))
+            Set rng = ws.UsedRange
+        End If
+        rng.Copy
+        ' Add corresponding sentence after the 2nd, 3rd, and 4th arrays
+        If i = 1 Then
+            myData = myData & vbCrLf & "6. 고객사 단말 현황"
+        ElseIf i = 2 Then
+            myData = myData & vbCrLf & "7. 고객사별 서비스점검 내역"
+        ElseIf i = 3 Then
+            myData = myData & vbCrLf & "8. 대표번호 녹취내역"
+        End If
+        myData = myData & vbCrLf & sheetsAndRanges(i)
+    Next i
+    
+    ' Copy the data with sentences to clipboard using Windows API
+    If OpenClipboard(0&) <> 0 Then
+        EmptyClipboard
+        hGlobalMemory = GlobalAlloc(&HGMEM_DDESHARE Or &HGMEM_MOVEABLE, Len(myData) + 2)
+        If hGlobalMemory <> 0 Then
+            lpGlobalMemory = GlobalLock(hGlobalMemory)
+            If lpGlobalMemory <> 0 Then
+                lstrcpy lpGlobalMemory, StrPtr(myData)
+                GlobalUnlock lpGlobalMemory
+                SetClipboardData CF_UNICODETEXT, hGlobalMemory
+            End If
+        End If
+        CloseClipboard
+    End If
+End Sub
