@@ -27,3 +27,26 @@ Sub QueryAggregateData()
         MsgBox "Error: " & httpRequest.Status & " - " & httpRequest.statusText
     End If
 End Sub
+
+Sub RetrieveQueryData(requestId As String)
+    Dim httpRequest As Object
+    Set httpRequest = CreateObject("MSXML2.XMLHTTP")
+    
+    ' Set up the GET request to retrieve the data
+    httpRequest.Open "GET", "https://api.infobip.com/metrics/1/requests/" & requestId & "/data", False
+    httpRequest.setRequestHeader "Authorization", "Basic YourBase64EncodedCredentials"
+    
+    ' Send the request
+    httpRequest.Send
+    
+    ' Check the response
+    If httpRequest.Status = 200 Then
+        Dim jsonResponse As Object
+        Set jsonResponse = JsonConverter.ParseJson(httpRequest.responseText)
+        
+        ' Now you have the data in jsonResponse, you can process it and insert into Excel
+        ' This part of the code will depend on the structure of your JSON response and how you want to format it in Excel
+    Else
+        MsgBox "Error: " & httpRequest.Status & " - " & httpRequest.statusText
+    End If
+End Sub
