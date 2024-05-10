@@ -1,0 +1,29 @@
+Sub QueryAggregateData()
+    Dim httpRequest As Object
+    Set httpRequest = CreateObject("MSXML2.XMLHTTP")
+    
+    ' Set up the POST request
+    httpRequest.Open "POST", "https://api.infobip.com/metrics/1/query-aggregate-data", False
+    httpRequest.setRequestHeader "Content-Type", "application/json"
+    httpRequest.setRequestHeader "Authorization", "Basic YourBase64EncodedCredentials"
+    
+    ' Send the request with the necessary parameters
+    Dim jsonBody As String
+    jsonBody = "{""filterBy"":{""sentSince"":""2024-04-01T00:00:00.000+0000"",""sentUntil"":""2024-04-01T01:00:00.000+0000""},""aggregateBy"":[""ACCOUNT_KEY"",""HOUR""],""metrics"":[""TOTAL_TRAFFIC_COUNT"",""DELIVERED_TRAFFIC_COUNT""]}"
+    httpRequest.Send jsonBody
+    
+    ' Check for successful response
+    If httpRequest.Status = 201 Then
+        Dim jsonResponse As Object
+        Set jsonResponse = JsonConverter.ParseJson(httpRequest.responseText)
+        
+        ' Extract the requestID
+        Dim requestId As String
+        requestId = jsonResponse("requestID")
+        
+        ' You can now use the requestId to check the status of your query
+        ' and eventually get the aggregated data to insert into Excel
+    Else
+        MsgBox "Error: " & httpRequest.Status & " - " & httpRequest.statusText
+    End If
+End Sub
